@@ -4,7 +4,7 @@
 #include "analyzer.h"
 
 struct Analyzer
-{   
+{                   //sprawdzic czy zgodne z FAM
     uint8_t cpu_count;                                                                        // [0]    [1]     [2]   [3]    [4]   [5]    [6]      [7]    [8]     [9] 
     Data* prev_values;      //[0] = prev_user; [1] = prev_nice; [2] = prev_system [3] ... // user  nice   system  idle  iowait  irq  softirq  steal  guest  guest_nice
     float usage_array[];
