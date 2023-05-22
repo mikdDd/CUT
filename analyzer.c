@@ -24,6 +24,8 @@ void analyzer_delete(Analyzer* analyzer){
 
 float* analyzer_analyze_data(Analyzer* analyzer, Data arr[]){
                    
+    if(arr == NULL)return NULL;
+    if(analyzer == NULL)return NULL;
     for(size_t i = 0; i < analyzer->cpu_count; i++){
 
         uint32_t prev_idle = analyzer->prev_values[i].idle + analyzer->prev_values[i].iowait;     //10 bo taka wielkość wiersza w proc/stat
