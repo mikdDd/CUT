@@ -64,7 +64,7 @@ Data* reader_read_data(Reader* reader){
     for(size_t i = 0; i < buflen; i++){
        // printf("%c",reader->buf[i]);
     }
-    printf("SIZE : %zu\n",buflen);
+   // printf("SIZE : %zu\n",buflen);
     
     
   
