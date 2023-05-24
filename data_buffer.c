@@ -5,7 +5,7 @@
 
 //enum{CAPACITY = 5};         //zmienic na define 
 struct Data_buffer{
-    char* name;
+    bool is_to_deletion;
     size_t capacity;
     size_t elem_size;
     size_t size;
@@ -14,13 +14,14 @@ struct Data_buffer{
     pthread_mutex_t mutex;
     pthread_cond_t can_produce;
     pthread_cond_t can_consume;
-    bool is_to_deletion;
+    
     uint8_t buffer[];   //FAM
 };
 
-Data_buffer* data_buffer_new(const size_t elem_size, const size_t capacity, char* name){
+Data_buffer* data_buffer_new(const size_t elem_size, const size_t capacity){
 
     if(elem_size == 0)return NULL;
+    if(capacity == 0)return NULL;
 
     Data_buffer* db = calloc(1, sizeof(Data_buffer) + (elem_size * capacity));
     if(db == NULL)return NULL;
@@ -28,7 +29,6 @@ Data_buffer* data_buffer_new(const size_t elem_size, const size_t capacity, char
     db->capacity = capacity;
     db->elem_size = elem_size;
     db->is_to_deletion = false;
-    db->name = name;
     pthread_mutex_init(&db->mutex,NULL);
     pthread_cond_init(&db->can_produce,NULL);
     pthread_cond_init(&db->can_consume,NULL);
@@ -57,19 +57,16 @@ bool buffer_is_to_deletion(const Data_buffer* const db){
 void buffer_put(Data_buffer* restrict db, const void* restrict data){
     if(db == NULL)return;
     if(buffer_is_full(db))return;
-    if(data == NULL){
-        printf("XDDDD\n");return;}
+    if(data == NULL){return;}
     memcpy(&db->buffer[db->head * db->elem_size], data, db->elem_size);
     db->head = (db->head+1)%db->capacity;
     db->size++;
 }
 void buffer_get(Data_buffer* db, void* restrict ptr){
     if(db == NULL)return;
-    if(buffer_is_empty(db)){
-        printf("RETURN1\n"); return;
-        }
-    if(ptr == NULL){ printf("RETURN2\n"); return;}
-    //Data* d = db->buffer[db->tail];
+    if(buffer_is_empty(db)){ return; }
+    if(ptr == NULL){ return;}
+
     
     memcpy(ptr,&db->buffer[db->tail * db->elem_size],db->elem_size);
     db->tail = (db->tail + 1) % db->capacity;
@@ -109,61 +106,38 @@ int buffer_wait_for_producer_timedwait(Data_buffer* db, struct timespec* ts){
 }
 
 void thread__producer_cleanup(void* arg){
-     //printf("CLEANUP\n");
      Data_buffer* db = (Data_buffer*) arg;
      
-//       if(!buffer_is_full(db)){
-//        void* dummy_ptr;
-//      buffer_put(db,&dummy_ptr);
-//      // free(dummy_ptr);
-//    }
-printf("%s PRODUCER CANCELATION \n",db->name);
 if(db->is_to_deletion)return;
 buffer_lock(db);
 db->is_to_deletion = true;
 buffer_call_consumer(db);
     
     buffer_unlock(db);
-//db->head = (db->head+1)%db->capacity;
-  //  db->size++;
-    printf("%s CONSUMER CANCELATION FINISHED\n",db->name);
-    //data_buffer_delete(db);
-  //  printf("PRODUCER CLEANUP\n");
+
 }
 
 void thread__consumer_cleanup(void* arg){
      Data_buffer* db = (Data_buffer*) arg;
     
-    printf("%s CONSUMER CANCELATION \n",db->name);
-    // if(!buffer_is_empty(db)){
-    //      void* dummy_ptr;
-    //     buffer_get(db,&dummy_ptr);
-    //       //free(dummy_ptr);
-    // }
+  
     if(db->is_to_deletion)return;
     buffer_lock(db);
-    printf("%s CONSUMER BUFFER ENTERED \n",db->name);
+  
     db->is_to_deletion = true;
     buffer_call_producer(db);
     
     buffer_unlock(db);
-    printf("%s CONSUMER CANCELATION FINISHED\n",db->name);
-    // db->tail = (db->tail + 1) % db->capacity;
-    // db->size--;
-    //free(db->buffer);
-    
-    // buffer_call_producer(db);
-      // data_buffer_delete(db);
-    //db->size = 0;
-   //  printf("CONSUMER CLEANUP\n");
+
+   
 }
 
-void watchdog_consumer_cleanup(void* arg){
-     Data_buffer* db = (Data_buffer*) arg;
+// void watchdog_consumer_cleanup(void* arg){
+//      Data_buffer* db = (Data_buffer*) arg;
     
-    thread__log_producer_put_to_buffer(db,(char*){"DDDWWWDDDWWWDDDWW"});
+//     thread__log_producer_put_to_buffer(db,(char*){"DDDWWWDDDWWWDDDWW"});
         
-}
+// }
 
 void thread__log_producer_put_to_buffer(Data_buffer* db, char* data){
     pthread_setcancelstate(PTHREAD_CANCEL_DISABLE,NULL);
@@ -178,5 +152,55 @@ void thread__log_producer_put_to_buffer(Data_buffer* db, char* data){
           
           buffer_unlock(db);
           pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+          pthread_testcancel();
+}
+
+void buffer_thread_producer(Data_buffer* db, void* data){
+
+     pthread_setcancelstate(PTHREAD_CANCEL_DISABLE,NULL);
+          buffer_lock(db);               //SEKCJA KRYTYCZNA
+             
+             
+             if(!buffer_is_to_deletion(db)){
+                if(buffer_is_full(db)){
+             //   printf("[%d]BUFFER FULL, WAITING\n",tid);
+                  //  thread__log_producer_put_to_buffer(log_buffer,(char*){"READER WAITING FOR ANALYZER"});
+                    buffer_wait_for_consumer(db);
+                   //  printf("[%d]BUFFER END WAIT\n",tid);
+               }
+             //  void* ptr = malloc(sizeof(Data));
+            //   printf("[%d]SPACE FOUND\n",tid);
+               buffer_put(db,&data);        
+              // free(ptr);
+           //   thread__log_producer_put_to_buffer(log_buffer,(char*){"READER PRODUCING"});
+               buffer_call_consumer(db);
+              // str = "READER PUT TO BUFFER";
+             }
+              
+          buffer_unlock(db);
+          pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+          pthread_testcancel();
+}
+
+void buffer_thread_consumer(Data_buffer* db, void* data){
+   
+          pthread_setcancelstate(PTHREAD_CANCEL_DISABLE,NULL);
+
+          
+         
+          buffer_lock(db);            
+      
+         if(!buffer_is_to_deletion(db)){
+               if(buffer_is_empty(db)){
+                buffer_wait_for_producer(db);
+               }
+        
+                buffer_get(db,&data);
+                buffer_call_producer(db);
+             }
+          buffer_unlock(db);
+
+        pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+          
           pthread_testcancel();
 }

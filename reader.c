@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-static size_t cpu_count(void);
+static uint8_t cpu_count(void);
 
 enum{MAX_BUF_LEN = 10000};   
 struct Reader
@@ -16,7 +16,7 @@ struct Reader
 };
 
 Reader* reader_new(void){
-    size_t cpu_cnt = cpu_count();
+    uint8_t cpu_cnt = cpu_count();
    // printf("SDSDSD%zu\n",sizeof(Reader));
     Reader* reader = calloc(1,sizeof(Reader) + (sizeof(Data)*cpu_cnt));
    // printf("SDSDSD%zu\n",sizeof(*reader));
@@ -29,16 +29,16 @@ void reader_delete(Reader* reader){
     free(reader);
 }
 
-static size_t cpu_count(void){
+static uint8_t cpu_count(void){
     char* p;
     char s[MAX_BUF_LEN]={0};
-    int count = 0;
-    size_t buflen = 0;
+    uint8_t count = 0;
+    //size_t buflen = 0;
     FILE* fp = fopen("/proc/stat","rb");
     if(fp==NULL){return 0;}
 
     while(!feof(fp)){
-        buflen = fread(s,1,MAX_BUF_LEN,fp);
+        fread(s,1,MAX_BUF_LEN,fp);
     }
     fclose(fp);
     for (p = s; (p = strstr(p, "cpu")) != NULL; p++)
@@ -74,61 +74,61 @@ Data* reader_read_data(Reader* reader){
 
     size_t arr_iterator = 0;
    while(iterator < (reader->cpu_count ) * 11 ){
-        size_t debug1 = arr_iterator;
-        uint32_t debug2;
+       // size_t debug1 = arr_iterator;
+        //uint32_t debug2;
         switch (iterator%11){
             case 0:
                 if(iterator!=0){arr_iterator++;}
             break;
 
             case 1:
-                reader->cpu_record_arr[arr_iterator].user = atoi(row);
-                debug2 = reader->cpu_record_arr[arr_iterator].user;
+                reader->cpu_record_arr[arr_iterator].user = (uint32_t)atoi(row);
+                //debug2 = reader->cpu_record_arr[arr_iterator].user;
             break;
 
             case 2:
-                reader->cpu_record_arr[arr_iterator].nice = atoi(row);
-                debug2 = reader->cpu_record_arr[arr_iterator].nice;
+                reader->cpu_record_arr[arr_iterator].nice = (uint32_t)atoi(row);
+                //debug2 = reader->cpu_record_arr[arr_iterator].nice;
             break;
 
             case 3:
-                reader->cpu_record_arr[arr_iterator].system = atoi(row);
-                debug2 = reader->cpu_record_arr[arr_iterator].system;
+                reader->cpu_record_arr[arr_iterator].system = (uint32_t)atoi(row);
+               // debug2 = reader->cpu_record_arr[arr_iterator].system;
             break;
 
             case 4:
-                reader->cpu_record_arr[arr_iterator].idle = atoi(row);
-                debug2 = reader->cpu_record_arr[arr_iterator].idle;
+                reader->cpu_record_arr[arr_iterator].idle = (uint32_t)atoi(row);
+               // debug2 = reader->cpu_record_arr[arr_iterator].idle;
             break;
 
             case 5:
-                reader->cpu_record_arr[arr_iterator].iowait = atoi(row);
-                debug2 = reader->cpu_record_arr[arr_iterator].iowait;
+                reader->cpu_record_arr[arr_iterator].iowait = (uint32_t)atoi(row);
+                //debug2 = reader->cpu_record_arr[arr_iterator].iowait;
             break;
 
             case 6:
-                reader->cpu_record_arr[arr_iterator].irq = atoi(row);
-                debug2 = reader->cpu_record_arr[arr_iterator].irq;
+                reader->cpu_record_arr[arr_iterator].irq = (uint32_t)atoi(row);
+                //debug2 = reader->cpu_record_arr[arr_iterator].irq;
             break;
 
             case 7:
-                reader->cpu_record_arr[arr_iterator].softirq = atoi(row);
-                debug2 = reader->cpu_record_arr[arr_iterator].softirq;
+                reader->cpu_record_arr[arr_iterator].softirq = (uint32_t)atoi(row);
+                //debug2 = reader->cpu_record_arr[arr_iterator].softirq;
             break;
 
             case 8:
-                reader->cpu_record_arr[arr_iterator].steal = atoi(row);
-                debug2 = reader->cpu_record_arr[arr_iterator].steal;
+                reader->cpu_record_arr[arr_iterator].steal = (uint32_t)atoi(row);
+                //debug2 = reader->cpu_record_arr[arr_iterator].steal;
             break;
 
             case 9:
-                reader->cpu_record_arr[arr_iterator].guest = atoi(row);
-                debug2 = reader->cpu_record_arr[arr_iterator].guest;
+                reader->cpu_record_arr[arr_iterator].guest = (uint32_t)atoi(row);
+                //debug2 = reader->cpu_record_arr[arr_iterator].guest;
             break;
 
             case 10:
-                reader->cpu_record_arr[arr_iterator].guest_nice = atoi(row);
-                debug2 = reader->cpu_record_arr[arr_iterator].guest_nice;
+                reader->cpu_record_arr[arr_iterator].guest_nice = (uint32_t)atoi(row);
+               // debug2 = reader->cpu_record_arr[arr_iterator].guest_nice;
             break;
         
             default:

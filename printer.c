@@ -18,10 +18,10 @@ void printer_delete(Printer* printer){
 }
 
 void printer_print_data(Printer* printer, float usage_array[]){
-    printf("| Total CPU usage: %.1f%% ", usage_array[0]);
+    printf("| Total CPU usage: %.1f%% ", (double)usage_array[0]);
     
     for(size_t i = 0; i < printer->cpu_count; i++){
-        printf("| CPU(%zu) usage: %.1f%% ",i, usage_array[i]);
+        printf("| CPU(%zu) usage: %.1f%% ",i, (double)usage_array[i]);
     }
 
     printf("\n");

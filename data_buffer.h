@@ -3,9 +3,9 @@
 #include "data.h"
 #include <stdbool.h>
 #include <stddef.h>
-#include <sys/time.h>
+#include <time.h>
 typedef struct Data_buffer Data_buffer;
-Data_buffer* data_buffer_new(size_t elem_size, size_t capacity, char* name);
+Data_buffer* data_buffer_new(size_t elem_size, size_t capacity);
 void data_buffer_delete(Data_buffer* db);
 bool buffer_is_full(const Data_buffer* db);
 bool buffer_is_empty(const Data_buffer* db);
@@ -22,5 +22,7 @@ void thread__producer_cleanup(void* arg);
 void thread__consumer_cleanup(void* arg);
 void thread__log_producer_put_to_buffer(Data_buffer* db, char* data);
 bool buffer_is_to_deletion(const Data_buffer* const db);
+void buffer_thread_producer(Data_buffer* db, void* data);
+void buffer_thread_consumer(Data_buffer* db, void* data);
 
 #endif
