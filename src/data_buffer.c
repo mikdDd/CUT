@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <string.h>
-
+#include <errno.h>
 //enum{CAPACITY = 5};         //zmienic na define 
 struct Data_buffer{
     bool is_to_deletion;
@@ -62,10 +62,11 @@ void buffer_put(Data_buffer* restrict db, const void* restrict data){
     db->head = (db->head+1)%db->capacity;
     db->size++;
 }
-void buffer_get(Data_buffer* db, void* restrict ptr){
+void buffer_get(Data_buffer* restrict db, void* restrict ptr){
+    
     if(db == NULL)return;
     if(buffer_is_empty(db)){ return; }
-    if(ptr == NULL){ return;}
+  //  if(ptr == NULL){ printf("UNSUCCESFULL\n"); return;}
 
     
     memcpy(ptr,&db->buffer[db->tail * db->elem_size],db->elem_size);
@@ -182,11 +183,11 @@ void buffer_thread_producer(Data_buffer* db, void* data){
           pthread_testcancel();
 }
 
-void buffer_thread_consumer(Data_buffer* db, void* data){
-   
+void buffer_thread_consumer(Data_buffer* db, void** data){
+    
           pthread_setcancelstate(PTHREAD_CANCEL_DISABLE,NULL);
 
-          
+    
          
           buffer_lock(db);            
       
@@ -194,8 +195,8 @@ void buffer_thread_consumer(Data_buffer* db, void* data){
                if(buffer_is_empty(db)){
                 buffer_wait_for_producer(db);
                }
-        
-                buffer_get(db,&data);
+                
+                buffer_get(db,&(*data));
                 buffer_call_producer(db);
              }
           buffer_unlock(db);
@@ -203,4 +204,34 @@ void buffer_thread_consumer(Data_buffer* db, void* data){
         pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
           
           pthread_testcancel();
+}
+
+void buffer_watchdog_thread_consumer(Data_buffer* db, char (*error_string)[], char* error_message, bool* cancel_signal, struct timespec* ts){
+            int rc = 0 ;
+           buffer_lock(db);               //SEKCJA KRYTYCZNA
+
+          if(!buffer_is_to_deletion(db) && !(*cancel_signal)){
+               if(buffer_is_empty(db)){
+                 //   printf("WATCHJDOG WAITING\n");
+                rc = buffer_wait_for_producer_timedwait(db,ts);
+               
+               }
+               if(rc == ETIMEDOUT){
+            
+                    *(cancel_signal) = true;
+                    strcpy((*error_string),error_message);
+            
+                    
+               } else {
+                    
+                
+                    void* dummy_ptr;
+                    buffer_get(db,&dummy_ptr);
+                    buffer_call_producer(db);
+                }
+               
+          }
+               
+              
+          buffer_unlock(db);
 }

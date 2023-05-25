@@ -19,6 +19,7 @@ Reader* reader_new(void){
     uint8_t cpu_cnt = cpu_count();
    // printf("SDSDSD%zu\n",sizeof(Reader));
     Reader* reader = calloc(1,sizeof(Reader) + (sizeof(Data)*cpu_cnt));
+    if(reader == NULL)return NULL;
    // printf("SDSDSD%zu\n",sizeof(*reader));
     reader->cpu_count = cpu_cnt;
     //printf("SDASDAD: %zu, %zu\n",sizeof(*reader),sizeof(Reader_cpu_record)*cpu_count());
@@ -26,8 +27,10 @@ Reader* reader_new(void){
 
 }
 void reader_delete(Reader* reader){
+    if(reader == NULL)return;
     free(reader);
 }
+
 
 static uint8_t cpu_count(void){
     char* p;
@@ -47,10 +50,13 @@ static uint8_t cpu_count(void){
 }
 
 uint8_t reader_get_cpu_count(Reader* reader){
+    if(reader == NULL)return 0;
     return reader->cpu_count;
 }
 
 Data* reader_read_data(Reader* reader){
+
+    if(reader == NULL)return NULL;
     size_t buflen = 0;
     FILE* fp = fopen("/proc/stat","rb");
     

@@ -23,6 +23,7 @@ void thread__consumer_cleanup(void* arg);
 void thread__log_producer_put_to_buffer(Data_buffer* db, char* data);
 bool buffer_is_to_deletion(const Data_buffer* const db);
 void buffer_thread_producer(Data_buffer* db, void* data);
-void buffer_thread_consumer(Data_buffer* db, void* data);
+void buffer_thread_consumer(Data_buffer* db, void** data);
+void buffer_watchdog_thread_consumer(Data_buffer* db, char (*error_string)[], char* error_message, bool* cancel_signal, struct timespec* ts);
 
 #endif
