@@ -7,7 +7,7 @@ struct Watchdog {
     pthread_t* thread_array[];
 };
 
-Watchdog* watchdog_new(pthread_t* thread_array[], uint8_t thread_count){
+Watchdog* watchdog_new(const pthread_t* thread_array[const], const uint8_t thread_count){
    
     if(thread_array == NULL)return NULL;
     if(thread_count == 0)return NULL;
@@ -18,18 +18,17 @@ Watchdog* watchdog_new(pthread_t* thread_array[], uint8_t thread_count){
     memcpy(wd->thread_array,thread_array,thread_count*sizeof(pthread_t*));
     return wd;
 }
-void watchdog_delete(Watchdog* watchdog){
+void watchdog_delete(Watchdog* const watchdog){
     if(watchdog == NULL)return;
     free(watchdog);
 }
 
-void watchdog_cancel_threads(Watchdog* watchdog){
+void watchdog_cancel_threads(const Watchdog* const watchdog){
 
-   // size_t debug1 = watchdog->thread_count;
+   if(watchdog == NULL)return;
 
     if(watchdog==NULL)return;
     for(size_t i = 0; i < watchdog->thread_count; i++){
-        //pid_t t = (pid_t) *(watchdog->thread_array[i]);
         pthread_cancel(*(watchdog->thread_array[i]));
     }
 }

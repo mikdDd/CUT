@@ -10,21 +10,26 @@ struct Analyzer
     float usage_array[];
 };
 
-Analyzer* analyzer_new(uint8_t cpu_count){
+Analyzer* analyzer_new(const uint8_t cpu_count){
+    if(cpu_count == 0)return NULL;
     Analyzer* a = calloc(1,sizeof(Analyzer) + sizeof(float)*cpu_count);
+    if(a == NULL)return NULL;
     a->cpu_count = cpu_count;
     a->prev_values = calloc(cpu_count, sizeof(Data));
     return a;
 }
-void analyzer_delete(Analyzer* analyzer){
+void analyzer_delete(Analyzer* const analyzer){
+    if(analyzer == NULL)return;
     free(analyzer->prev_values);
     free(analyzer);
 }
 
-float* analyzer_analyze_data(Analyzer* analyzer, Data arr[]){
-    float ret;
-    if(arr == NULL)return NULL;
+float* analyzer_analyze_data(Analyzer* const analyzer, const Data arr[const]){
     if(analyzer == NULL)return NULL;
+    if(arr == NULL)return NULL;
+
+    float ret;
+
     for(size_t i = 0; i < analyzer->cpu_count; i++){
 
         uint32_t prev_idle = analyzer->prev_values[i].idle + analyzer->prev_values[i].iowait;

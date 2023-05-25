@@ -5,7 +5,7 @@
 
 typedef struct Logger Logger;
 Logger* logger_new(char* const file_name);
-void logger_delete(Logger* logger);
-void logger_log_data(Logger* logger, char array[]);
+void logger_delete(Logger* const logger);
+void logger_log_data(Logger* const logger, const char* const string);
 
 #endif

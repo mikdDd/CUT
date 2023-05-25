@@ -35,7 +35,7 @@ Data_buffer* data_buffer_new(const size_t elem_size, const size_t capacity){
 
     return db;
 }
-void data_buffer_delete(Data_buffer* db){
+void data_buffer_delete(Data_buffer* const db){
 
     if(db == NULL)return;
     pthread_cond_destroy(&db->can_consume);
@@ -52,9 +52,10 @@ bool buffer_is_empty(const Data_buffer* const db){
     return db->size == 0;
 }
 bool buffer_is_to_deletion(const Data_buffer* const db){
+    if(db == NULL)return NULL;
     return db->is_to_deletion;
 }
-void buffer_put(Data_buffer* restrict db, const void* restrict data){
+void buffer_put(Data_buffer* const restrict db, const void *const restrict data){
     if(db == NULL)return;
     if(buffer_is_full(db))return;
     if(data == NULL){return;}
@@ -62,11 +63,10 @@ void buffer_put(Data_buffer* restrict db, const void* restrict data){
     db->head = (db->head+1)%db->capacity;
     db->size++;
 }
-void buffer_get(Data_buffer* restrict db, void* restrict ptr){
+void buffer_get(Data_buffer* const restrict db, void* const restrict ptr){
     
     if(db == NULL)return;
     if(buffer_is_empty(db)){ return; }
-  //  if(ptr == NULL){ printf("UNSUCCESFULL\n"); return;}
 
     
     memcpy(ptr,&db->buffer[db->tail * db->elem_size],db->elem_size);
@@ -74,31 +74,31 @@ void buffer_get(Data_buffer* restrict db, void* restrict ptr){
     db->size--;
 
 }
-void buffer_lock(Data_buffer* db){
+void buffer_lock(Data_buffer* const db){
     if(db == NULL)return;
     pthread_mutex_lock(&db->mutex);
 }
-void buffer_unlock(Data_buffer* db){
+void buffer_unlock(Data_buffer* const db){
     if(db == NULL)return;
     pthread_mutex_unlock(&db->mutex);
 }
-void buffer_call_producer(Data_buffer* db){
+void buffer_call_producer(Data_buffer* const db){
     if(db == NULL)return;
     pthread_cond_signal(&db->can_produce);
 }
-void buffer_call_consumer(Data_buffer* db){
+void buffer_call_consumer(Data_buffer* const db){
     if(db == NULL)return;
     pthread_cond_signal(&db->can_consume);
 }
-void buffer_wait_for_producer(Data_buffer* db){
+void buffer_wait_for_producer(Data_buffer* const db){
     if(db == NULL)return;
     pthread_cond_wait(&db->can_consume, &db->mutex);
 }
-void buffer_wait_for_consumer(Data_buffer* db){
+void buffer_wait_for_consumer(Data_buffer* const db){
     if(db == NULL)return;
     pthread_cond_wait(&db->can_produce,&db->mutex);
 }
-int buffer_wait_for_producer_timedwait(Data_buffer* db, struct timespec* ts){
+int buffer_wait_for_producer_timedwait(Data_buffer* const db, const struct timespec* const ts){
     
     if(db == NULL)return -1;
     //TODO: sprawdzic timespeca
@@ -106,23 +106,25 @@ int buffer_wait_for_producer_timedwait(Data_buffer* db, struct timespec* ts){
     return pthread_cond_timedwait(&db->can_consume, &db->mutex, ts);
 }
 
-void thread__producer_cleanup(void* arg){
-     Data_buffer* db = (Data_buffer*) arg;
+void buffer_thread_producer_cleanup(void* const arg){
      
-if(db->is_to_deletion)return;
-buffer_lock(db);
-db->is_to_deletion = true;
-buffer_call_consumer(db);
+    if(arg == NULL)return;
+    Data_buffer* db = (Data_buffer*) arg;
+    if(db->is_to_deletion)return;
+    
+    buffer_lock(db);
+    db->is_to_deletion = true;
+    buffer_call_consumer(db);
     
     buffer_unlock(db);
 
 }
 
-void thread__consumer_cleanup(void* arg){
-     Data_buffer* db = (Data_buffer*) arg;
-    
-  
+void buffer_thread_consumer_cleanup(void* const arg){
+    if(arg == NULL)return;
+    Data_buffer* db = (Data_buffer*) arg;
     if(db->is_to_deletion)return;
+    
     buffer_lock(db);
   
     db->is_to_deletion = true;
@@ -156,7 +158,7 @@ void thread__log_producer_put_to_buffer(Data_buffer* db, char* data){
           pthread_testcancel();
 }
 
-void buffer_thread_producer(Data_buffer* db, void* data){
+void buffer_thread_producer(Data_buffer* const restrict db,  const void *const restrict data){
 
      pthread_setcancelstate(PTHREAD_CANCEL_DISABLE,NULL);
           buffer_lock(db);               //SEKCJA KRYTYCZNA
@@ -171,7 +173,7 @@ void buffer_thread_producer(Data_buffer* db, void* data){
                }
              //  void* ptr = malloc(sizeof(Data));
             //   printf("[%d]SPACE FOUND\n",tid);
-               buffer_put(db,&data);        
+               buffer_put(db,  (void*)&data);        
               // free(ptr);
            //   thread__log_producer_put_to_buffer(log_buffer,(char*){"READER PRODUCING"});
                buffer_call_consumer(db);
@@ -183,7 +185,7 @@ void buffer_thread_producer(Data_buffer* db, void* data){
           pthread_testcancel();
 }
 
-void buffer_thread_consumer(Data_buffer* db, void** data){
+void buffer_thread_consumer(Data_buffer* const restrict db, void** const restrict data){
     
           pthread_setcancelstate(PTHREAD_CANCEL_DISABLE,NULL);
 
@@ -206,7 +208,7 @@ void buffer_thread_consumer(Data_buffer* db, void** data){
           pthread_testcancel();
 }
 
-void buffer_watchdog_thread_consumer(Data_buffer* db, char (*error_string)[], char* error_message, bool* cancel_signal, struct timespec* ts){
+void buffer_watchdog_thread_consumer(Data_buffer* const db, const char (*error_string)[], const char* const error_message, bool* const cancel_signal, const struct timespec* const ts){
             int rc = 0 ;
            buffer_lock(db);               //SEKCJA KRYTYCZNA
 

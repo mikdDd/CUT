@@ -57,9 +57,9 @@ static void term (int signum){
 
 static void* thread_reader(void* arg){              
      Reader* reader = (Reader*)arg;
-     pthread_cleanup_push(thread__producer_cleanup,log_buffer)
-     pthread_cleanup_push(thread__producer_cleanup,reader_buffer)
-     pthread_cleanup_push(thread__producer_cleanup,reader_watch_buffer)
+     pthread_cleanup_push(buffer_thread_producer_cleanup,log_buffer)
+     pthread_cleanup_push(buffer_thread_producer_cleanup,reader_buffer)
+     pthread_cleanup_push(buffer_thread_producer_cleanup,reader_watch_buffer)
        
      while(1){
         //  char* str = "";
@@ -143,10 +143,10 @@ static void* thread_analyzer(void* arg){
      
     // pthread_cleanup_push(thread_cleanup,buffer);
     // pthread_cleanup_push(thread_cleanup,usage_buffer);
-     pthread_cleanup_push(thread__producer_cleanup,log_buffer)
-    pthread_cleanup_push(thread__consumer_cleanup,reader_buffer)
-    pthread_cleanup_push(thread__producer_cleanup,usage_buffer)
-    pthread_cleanup_push(thread__producer_cleanup,analyzer_watch_buffer)
+     pthread_cleanup_push(buffer_thread_producer_cleanup,log_buffer)
+    pthread_cleanup_push(buffer_thread_consumer_cleanup,reader_buffer)
+    pthread_cleanup_push(buffer_thread_producer_cleanup,usage_buffer)
+    pthread_cleanup_push(buffer_thread_producer_cleanup,analyzer_watch_buffer)
    
      while(1){
          // sleep(3);
@@ -265,9 +265,9 @@ static void* thread_analyzer(void* arg){
 
 static void* thread_printer(void* arg){          
      Printer* printer = (Printer*)arg;
-     pthread_cleanup_push(thread__producer_cleanup,log_buffer)
-     pthread_cleanup_push(thread__consumer_cleanup,usage_buffer)
-     pthread_cleanup_push(thread__producer_cleanup,printer_watch_buffer)
+     pthread_cleanup_push(buffer_thread_producer_cleanup,log_buffer)
+     pthread_cleanup_push(buffer_thread_consumer_cleanup,usage_buffer)
+     pthread_cleanup_push(buffer_thread_producer_cleanup,printer_watch_buffer)
      
      while(1){
           
@@ -354,10 +354,10 @@ static void* thread_watchdog(void* arg){
      //struct timeval tp;
      //int rc = 0;
      //bool end = false;
-    pthread_cleanup_push(thread__consumer_cleanup,printer_watch_buffer)
-    pthread_cleanup_push(thread__consumer_cleanup,reader_watch_buffer)
-    pthread_cleanup_push(thread__consumer_cleanup,analyzer_watch_buffer)
-    pthread_cleanup_push(thread__producer_cleanup,log_buffer)
+    pthread_cleanup_push(buffer_thread_consumer_cleanup,printer_watch_buffer)
+    pthread_cleanup_push(buffer_thread_consumer_cleanup,reader_watch_buffer)
+    pthread_cleanup_push(buffer_thread_consumer_cleanup,analyzer_watch_buffer)
+    pthread_cleanup_push(buffer_thread_producer_cleanup,log_buffer)
     
      while(1){
         //  pid_t tid = syscall(__NR_gettid);
@@ -491,7 +491,7 @@ static void* thread_watchdog(void* arg){
 static void* thread_logger(void* arg){          
      Logger* logger = (Logger*)arg;
     
-     pthread_cleanup_push(thread__consumer_cleanup,log_buffer)
+     pthread_cleanup_push(buffer_thread_consumer_cleanup,log_buffer)
      //pthread_cleanup_push(thread__consumer_cleanup,analyzer_log_buffer);
     // pthread_cleanup_push(thread__consumer_cleanup,printer_log_buffer);
     
@@ -531,18 +531,7 @@ static void* thread_logger(void* arg){
 
 int main(void){
 
-     printf("SIZE OF CHAR* = %zu\n",sizeof(char*));
-     printf("SIZE OF SIZE_T = %zu\n",sizeof(size_t));
-     printf("SIZE OF PTHREAD_COND_T = %zu\n",sizeof(pthread_cond_t));
-     printf("SIZE OF PTHREAD_MUTEX_T = %zu\n",sizeof(pthread_mutex_t));
-     printf("SIZE OF bool = %zu\n",sizeof(bool));
-     
-//      pthread_mutex_t mutex;
-//     pthread_cond_t can_produce;
-//     pthread_cond_t can_consume;
-//     bool is_to_deletion;
-//     uint8_t buffer[];   //FAM
-
+ 
 
 
     
@@ -564,7 +553,7 @@ int main(void){
     // printer_log_buffer = data_buffer_new(sizeof(char*),5);
      pthread_t t_reader, t_analyzer, t_printer, t_watchdog, t_logger;
 
-     watchdog = watchdog_new((pthread_t*[]){&t_logger,&t_reader,&t_analyzer,&t_printer,&t_watchdog},5);         //COMPOUND LITERAL
+     watchdog = watchdog_new((const pthread_t*[]){&t_logger,&t_reader,&t_analyzer,&t_printer,&t_watchdog},5);         //COMPOUND LITERAL
 
       struct sigaction action;
      memset(&action, 0, sizeof(struct sigaction));

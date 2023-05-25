@@ -26,7 +26,7 @@ Reader* reader_new(void){
     return reader;
 
 }
-void reader_delete(Reader* reader){
+void reader_delete(Reader* const reader){
     if(reader == NULL)return;
     free(reader);
 }
@@ -49,12 +49,12 @@ static uint8_t cpu_count(void){
     return count;
 }
 
-uint8_t reader_get_cpu_count(Reader* reader){
+uint8_t reader_get_cpu_count(const Reader* const reader){
     if(reader == NULL)return 0;
     return reader->cpu_count;
 }
 
-Data* reader_read_data(Reader* reader){
+Data* reader_read_data(Reader* const reader){
 
     if(reader == NULL)return NULL;
     size_t buflen = 0;

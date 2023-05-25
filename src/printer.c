@@ -7,19 +7,24 @@ struct Printer{
     uint8_t cpu_count;
 };
 
-Printer* printer_new(uint8_t cpu_count){
+Printer* printer_new(const uint8_t cpu_count){
+    if(cpu_count == 0)return NULL;
+
     Printer* p = calloc(1,sizeof(Printer));
+    if(p == NULL)return NULL;
     p->cpu_count = cpu_count;
     return p;
 }
 
-void printer_delete(Printer* printer){
+void printer_delete(Printer* const printer){
+    if(printer == NULL)return;
     free(printer);
 }
 
-void printer_print_data(Printer* printer, float usage_array[]){
+void printer_print_data(const Printer* const printer, const float usage_array[const]){
     if(printer == NULL)return;
     if(usage_array == NULL)return;
+    
     printf("| Total CPU usage: %.1f%% ", (double)usage_array[0]);
     
     for(size_t i = 0; i < printer->cpu_count; i++){
