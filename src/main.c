@@ -32,8 +32,7 @@ static void* thread_logger(void*);
 static void* thread_watchdog(void*);
 static void term (int signum);
 
-
-static Data_buffer* reader_buffer = NULL;        //globalne     TODO: sprawdzanie czy buffer zainicjalizowany 
+static Data_buffer* reader_buffer = NULL;       //globalne     TODO: sprawdzanie czy buffer zainicjalizowany 
 static Data_buffer* usage_buffer = NULL;
 static Data_buffer* reader_watch_buffer = NULL;
 static Data_buffer* analyzer_watch_buffer = NULL;
@@ -70,7 +69,8 @@ static void* thread_reader(void* arg){
         //  printf("[%d]READER\n",tid);
         //  printf("[%d]START WORKING\n",tid);
      pthread_setcancelstate(PTHREAD_CANCEL_DISABLE,NULL);
-     Data* data_ptr = reader_read_data(reader);
+     Data* data = reader_read_data(reader);
+     void* data_ptr = &data;
      pthread_setcancelstate(PTHREAD_CANCEL_ENABLE,NULL);
         //  printf("[%d]END WORKING\n",tid);
           //pthread_setcancelstate()
@@ -80,7 +80,9 @@ static void* thread_reader(void* arg){
           
           thread__log_producer_put_to_buffer(log_buffer,(char*){"READER STOP PRODUCING"});
           
-          void* dummy_ptr = NULL;
+     
+          void* dummy = NULL;
+          void* dummy_ptr = &dummy;
           buffer_thread_producer(reader_watch_buffer, dummy_ptr);
           // pthread_setcancelstate(PTHREAD_CANCEL_DISABLE,NULL);
           // buffer_lock(reader_watch_buffer);
@@ -190,11 +192,11 @@ static void* thread_analyzer(void* arg){
 
          // printf("[%d]START ANALYZING\n",tid);
               float* usage_arr = analyzer_analyze_data(analyzer,data);
-               
+               void* usage_arr_ptr = &usage_arr;
 
           
           thread__log_producer_put_to_buffer(log_buffer,(char*){"ANALYZER START PRODUCING"});
-          buffer_thread_producer(usage_buffer,usage_arr);
+          buffer_thread_producer(usage_buffer,usage_arr_ptr);
      
      //      pthread_setcancelstate(PTHREAD_CANCEL_DISABLE,NULL);
      //      buffer_lock(usage_buffer);
@@ -224,7 +226,8 @@ static void* thread_analyzer(void* arg){
                
              //  printf("[%d]END ANALYZING\n",tid);
        //   printf("[%d]GETTING OUT OF BUFFER\n",tid);
-          void* dummy_ptr = NULL;
+          void* dummy = NULL;
+          void* dummy_ptr = &dummy;
           buffer_thread_producer(analyzer_watch_buffer,dummy_ptr);
           //  pthread_setcancelstate(PTHREAD_CANCEL_DISABLE,NULL);
           // buffer_lock(analyzer_watch_buffer);
@@ -309,7 +312,8 @@ static void* thread_printer(void* arg){
             //   printf("[%d]END PRINTING\n",tid);
         //  printf("[%d]GETTING OUT OF USAGE-BUFFER\n",tid);
           void* dummy_ptr =NULL;
-          buffer_thread_producer(printer_watch_buffer,dummy_ptr);
+          void* dummy_ptr_p = &dummy_ptr;
+          buffer_thread_producer(printer_watch_buffer,dummy_ptr_p);
           // pthread_setcancelstate(PTHREAD_CANCEL_DISABLE,NULL);
           // buffer_lock(printer_watch_buffer);
           // if(!buffer_is_to_deletion(printer_watch_buffer)){
@@ -369,108 +373,16 @@ static void* thread_watchdog(void* arg){
           pthread_setcancelstate(PTHREAD_CANCEL_DISABLE,NULL);
 
           buffer_watchdog_thread_consumer(reader_watch_buffer,&str,"READER ERROR", &cancel_signal_sent, &ts);
-          //  buffer_lock(reader_watch_buffer);               //SEKCJA KRYTYCZNA
-
-          // if(!buffer_is_to_deletion(reader_watch_buffer) && !cancel_signal_sent){
-          //      if(buffer_is_empty(reader_watch_buffer)){
-          //        //   printf("WATCHJDOG WAITING\n");
-          //         rc = buffer_wait_for_producer_timedwait(reader_watch_buffer,&ts);
-               
-          //      }
-          //      if(rc == ETIMEDOUT){
-            
-          //           cancel_signal_sent = true;
-          //           strcpy(str,"READER ERROR");
-            
-                    
-          //      } else {
-                    
-                
-          //           void* dummy_ptr;
-          //           buffer_get(reader_watch_buffer,&dummy_ptr);
-          //           buffer_call_producer(reader_watch_buffer);
-          //       }
-               
-          // }
-               
-              
-          // buffer_unlock(reader_watch_buffer);
-
-
+          
 
          
-         buffer_watchdog_thread_consumer(analyzer_watch_buffer,&str,"ANALYZER ERROR",&cancel_signal_sent, &ts);
-       //   pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
-       //   pthread_testcancel();
-
-        //  pthread_setcancelstate(PTHREAD_CANCEL_DISABLE,NULL);
-         
-         
-        //  pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
-         // pthread_testcancel();
-
-
-       //  pthread_setcancelstate(PTHREAD_CANCEL_DISABLE,NULL);
-          // buffer_lock(analyzer_watch_buffer);               //SEKCJA KRYTYCZNA
-
-          // if(!buffer_is_to_deletion(analyzer_watch_buffer) && !cancel_signal_sent){
-          //      if(buffer_is_empty(analyzer_watch_buffer)){
-          //       //    printf("WATCHJDOG WAITING\n");
-          //         rc = buffer_wait_for_producer_timedwait(analyzer_watch_buffer,&ts);
-               
-          //      }
-          //      if(rc == ETIMEDOUT){
-            
-          //           cancel_signal_sent = true;
-          //           strcpy(str,"ANALYZER ERROR");
-            
-                    
-          //      } else {
-                    
-                
-          //           void* dummy_ptr;
-          //           buffer_get(analyzer_watch_buffer,&dummy_ptr);
-          //           buffer_call_producer(analyzer_watch_buffer);
-          //       }
-               
-          // }
-               
-              
-          // buffer_unlock(analyzer_watch_buffer);
-            //  pthread_setcancelstate(PTHREAD_CANCEL_ENABLE);
-         //pthread_testcancel();
-
-     
-
-          //  buffer_lock(printer_watch_buffer);               //SEKCJA KRYTYCZNA
-
-          // if(!buffer_is_to_deletion(printer_watch_buffer)&& !cancel_signal_sent){
-          //      if(buffer_is_empty(printer_watch_buffer)){
-          //        //   printf("WATCHJDOG WAITING\n");
-          //         rc = buffer_wait_for_producer_timedwait(printer_watch_buffer,&ts);
-               
-          //      }
-          //      if(rc == ETIMEDOUT){
-            
-          //           cancel_signal_sent = true;
-          //           strcpy(str,"PRINTER ERROR");
-            
-                    
-          //      } else {
-                    
-                
-          //           void* dummy_ptr;
-          //           buffer_get(printer_watch_buffer,&dummy_ptr);
-          //           buffer_call_producer(printer_watch_buffer);
-          //       }
-               
-          // }
-               
-               buffer_watchdog_thread_consumer(printer_watch_buffer,&str,"PRINTER ERROR",&cancel_signal_sent, &ts);
-          // buffer_unlock(printer_watch_buffer);
+          buffer_watchdog_thread_consumer(analyzer_watch_buffer,&str,"ANALYZER ERROR",&cancel_signal_sent, &ts);
+      
+          buffer_watchdog_thread_consumer(printer_watch_buffer,&str,"PRINTER ERROR",&cancel_signal_sent, &ts);
+      
 
           pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
-           pthread_testcancel();
+          pthread_testcancel();
 
 
           if(cancel_signal_sent){
@@ -492,34 +404,13 @@ static void* thread_logger(void* arg){
      Logger* logger = (Logger*)arg;
     
      pthread_cleanup_push(buffer_thread_consumer_cleanup,log_buffer)
-     //pthread_cleanup_push(thread__consumer_cleanup,analyzer_log_buffer);
-    // pthread_cleanup_push(thread__consumer_cleanup,printer_log_buffer);
+  
     
      while(1){
-          //pid_t tid = syscall(__NR_gettid);
-        //  printf("[%d]LOGGER START\n",tid);
+      
           char* string = "";
           void* str_ptr = &string;
-     //      pthread_setcancelstate(PTHREAD_CANCEL_DISABLE,NULL);
-     //      buffer_lock(log_buffer);               //SEKCJA KRYTYCZNA
-     //   //   printf("[%d]LOGGER ENTERING BUFFER\n",tid);
-     //      if(!buffer_is_to_deletion(log_buffer)){
-     //            if(buffer_is_empty(log_buffer)){
-     //         //     printf("[%d]LOG-BUFFER EMPTY, WAITING\n",tid);
-     //                buffer_wait_for_producer(log_buffer);
-     //           }
-     //     //    printf("[%d]GETTING FROM LOGBUFFER\n",tid);
-               
-     //           buffer_get(log_buffer,&string);
-               
-     //           buffer_call_producer(log_buffer);
-     //      }
-               
-               
-     //      buffer_unlock(log_buffer);
-          
-     //      pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
-     //      pthread_testcancel();
+     
      buffer_thread_consumer(log_buffer,str_ptr);
           logger_log_data(logger,string);
          

@@ -158,7 +158,7 @@ void thread__log_producer_put_to_buffer(Data_buffer* db, char* data){
           pthread_testcancel();
 }
 
-void buffer_thread_producer(Data_buffer* const restrict db,  const void *const restrict data){
+void buffer_thread_producer(Data_buffer* const restrict db,  const void **const restrict data){
 
      pthread_setcancelstate(PTHREAD_CANCEL_DISABLE,NULL);
           buffer_lock(db);               //SEKCJA KRYTYCZNA
@@ -173,7 +173,10 @@ void buffer_thread_producer(Data_buffer* const restrict db,  const void *const r
                }
              //  void* ptr = malloc(sizeof(Data));
             //   printf("[%d]SPACE FOUND\n",tid);
-               buffer_put(db,  (void*)&data);        
+            //const void* const restrict data_ptr = &data;
+            //const void* const restrict ptr;
+          
+               buffer_put(db,  &(*data));        
               // free(ptr);
            //   thread__log_producer_put_to_buffer(log_buffer,(char*){"READER PRODUCING"});
                buffer_call_consumer(db);
@@ -208,7 +211,7 @@ void buffer_thread_consumer(Data_buffer* const restrict db, void** const restric
           pthread_testcancel();
 }
 
-void buffer_watchdog_thread_consumer(Data_buffer* const db, const char (*error_string)[], const char* const error_message, bool* const cancel_signal, const struct timespec* const ts){
+void buffer_watchdog_thread_consumer(Data_buffer* const db, char (*error_string)[], const char* const error_message, bool* const cancel_signal, const struct timespec* const ts){
             int rc = 0 ;
            buffer_lock(db);               //SEKCJA KRYTYCZNA
 

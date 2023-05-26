@@ -22,8 +22,8 @@ void buffer_thread_producer_cleanup(void* const arg);
 void buffer_thread_consumer_cleanup(void* const arg);
 void thread__log_producer_put_to_buffer(Data_buffer* db, char* data);
 bool buffer_is_to_deletion(const Data_buffer* const db);
-void buffer_thread_producer(Data_buffer* const restrict db, const void* const restrict data);
+void buffer_thread_producer(Data_buffer* const restrict db, const void** const restrict data);
 void buffer_thread_consumer(Data_buffer* const restrict db, void** const restrict data);
-void buffer_watchdog_thread_consumer(Data_buffer* const db, const char (*error_string)[], const char* const error_message, bool* const cancel_signal, const struct timespec* const ts);
+void buffer_watchdog_thread_consumer(Data_buffer* const db, char (*error_string)[], const char* const error_message, bool* const cancel_signal, const struct timespec* const ts);
 
 #endif

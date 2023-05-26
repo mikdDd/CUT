@@ -2,14 +2,15 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdbool.h>
+
 static uint8_t cpu_count(void);
 
-enum{MAX_BUF_LEN = 10000};   
+enum{MAX_BUF_LEN = 4000};   
 struct Reader
 {   
     
     uint8_t cpu_count;
-    char buf[MAX_BUF_LEN];
     Data cpu_record_arr[];
     //uint32_t cpu_record_arr[];       //FAM
     
@@ -34,18 +35,36 @@ void reader_delete(Reader* const reader){
 
 static uint8_t cpu_count(void){
     char* p;
-    char s[MAX_BUF_LEN]={0};
+    size_t buf_size = MAX_BUF_LEN;
+    char* tmp_buf = calloc(buf_size,sizeof(char));
     uint8_t count = 0;
-    //size_t buflen = 0;
-    FILE* fp = fopen("/proc/stat","rb");
-    if(fp==NULL){return 0;}
 
-    while(!feof(fp)){
-        fread(s,1,MAX_BUF_LEN,fp);
+    bool was_error = true;
+
+    while(was_error){
+        FILE* fp = fopen("/proc/stat","rb");
+        fread(tmp_buf,1,buf_size,fp);
+
+        if(ferror(fp) == 0 && feof(fp)!=0){
+            was_error = false;
+        }
+        if(was_error){
+            buf_size*=2;
+            tmp_buf = realloc(tmp_buf,sizeof(char) * buf_size);
+        }
+        fclose(fp);
     }
-    fclose(fp);
-    for (p = s; (p = strstr(p, "cpu")) != NULL; p++)
-        count++;
+    // FILE* fp = fopen("/proc/stat","rb");
+    // if(fp==NULL){return 0;}
+
+    // while(!feof(fp)){
+    //     fread(tmp_buf,1,MAX_BUF_LEN,fp);
+    // }
+    // fclose(fp);
+    for (p = tmp_buf; (p = strstr(p, "cpu")) != NULL; p++)
+    {count++;}
+        free(tmp_buf);
+        printf("SIZE: %zu\n",buf_size);
     return count;
 }
 
@@ -57,24 +76,30 @@ uint8_t reader_get_cpu_count(const Reader* const reader){
 Data* reader_read_data(Reader* const reader){
 
     if(reader == NULL)return NULL;
-    size_t buflen = 0;
-    FILE* fp = fopen("/proc/stat","rb");
+    size_t buf_size = MAX_BUF_LEN;
+     char* tmp_buf = calloc(buf_size,sizeof(char));
     
-    if(fp==NULL){return NULL;}
 
-    while(!feof(fp)){
-        buflen = fread(reader->buf,1,MAX_BUF_LEN,fp);
-    }
-    fclose(fp);
+     bool was_error = true;
 
-    for(size_t i = 0; i < buflen; i++){
-       // printf("%c",reader->buf[i]);
+    while(was_error){
+        FILE* fp = fopen("/proc/stat","rb");
+        fread(tmp_buf,1,buf_size,fp);
+
+        if(ferror(fp) == 0 && feof(fp)!=0){
+            was_error = false;
+        }
+        if(was_error){
+            buf_size*=2;
+            tmp_buf = realloc(tmp_buf,sizeof(char) * buf_size);
+        }
+        fclose(fp);
     }
-   // printf("SIZE : %zu\n",buflen);
+
     
     
   
-   char * row = strtok(reader->buf," \n");
+   char * row = strtok(tmp_buf," \n");
 
    size_t iterator = 0 ;
 
