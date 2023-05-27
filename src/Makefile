@@ -7,13 +7,13 @@ TDIR=tests
 
 DEPS = $(IDIR)
 
-_OBJ = reader.o analyzer.o printer.o watchdog.o logger.o main.o data_buffer.o
+_OBJ = reader.o analyzer.o printer.o watchdog.o logger.o main.o buffer.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
-_TDEFOBJ = reader.o analyzer.o printer.o watchdog.o logger.o data_buffer.o
+_TDEFOBJ = reader.o analyzer.o printer.o watchdog.o logger.o buffer.o
 TDEFOBJ = $(patsubst %,$(ODIR)/%,$(_TDEFOBJ))
 TODIR = $(patsubst %,$(TDIR)/%,$(ODIR))
-_TOBJ = test_reader.o test_main.o
+_TOBJ = test_reader.o test_analyzer.o test_printer.o test_watchdog.o test_logger.o test_buffer.o test_main.o
 TOBJ = $(patsubst %,$(TDIR)/$(ODIR)/%,$(_TOBJ))
 TIDIR = $(patsubst %,%$(IDIR),../)
 

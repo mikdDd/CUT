@@ -8,7 +8,7 @@
 #include "printer.h"
 #include "data.h"
 #include "watchdog.h"
-#include "data_buffer.h"
+#include "buffer.h"
 #include <errno.h>
 #include <sys/syscall.h>
 #include <sys/types.h>
@@ -32,12 +32,12 @@ static void* thread_logger(void*);
 static void* thread_watchdog(void*);
 static void term (int signum);
 
-static Data_buffer* reader_buffer = NULL;       //globalne     TODO: sprawdzanie czy buffer zainicjalizowany 
-static Data_buffer* usage_buffer = NULL;
-static Data_buffer* reader_watch_buffer = NULL;
-static Data_buffer* analyzer_watch_buffer = NULL;
-static Data_buffer* printer_watch_buffer = NULL;
-static Data_buffer* log_buffer = NULL;
+static Buffer* reader_buffer = NULL;       //globalne     TODO: sprawdzanie czy buffer zainicjalizowany 
+static Buffer* usage_buffer = NULL;
+static Buffer* reader_watch_buffer = NULL;
+static Buffer* analyzer_watch_buffer = NULL;
+static Buffer* printer_watch_buffer = NULL;
+static Buffer* log_buffer = NULL;
 static Watchdog* watchdog = NULL;
 
 
@@ -433,13 +433,13 @@ int main(void){
      Logger* logger = logger_new("Logs.txt");
      
    
-     reader_buffer = data_buffer_new(sizeof(Data*),5);
-     usage_buffer = data_buffer_new(sizeof(float*),5);
-     reader_watch_buffer = data_buffer_new(sizeof(void*),1);
-     analyzer_watch_buffer = data_buffer_new(sizeof(void*),1);
-     printer_watch_buffer = data_buffer_new(sizeof(void*),1);
+     reader_buffer = buffer_new(sizeof(Data*),5);
+     usage_buffer = buffer_new(sizeof(float*),5);
+     reader_watch_buffer = buffer_new(sizeof(void*),1);
+     analyzer_watch_buffer = buffer_new(sizeof(void*),1);
+     printer_watch_buffer = buffer_new(sizeof(void*),1);
 
-     log_buffer = data_buffer_new(sizeof(char*),5);
+     log_buffer = buffer_new(sizeof(char*),5);
    //  analyzer_log_buffer = data_buffer_new(sizeof(char*),5);
     // printer_log_buffer = data_buffer_new(sizeof(char*),5);
      pthread_t t_reader, t_analyzer, t_printer, t_watchdog, t_logger;
@@ -474,13 +474,12 @@ pthread_join(t_logger, NULL);
      
      printf("!!!!!!!!!!!!!!!![THREADS JOINED]!!!!!!!!!!!!!!!!!!!!\n");
      
-   data_buffer_delete(reader_buffer);
-    data_buffer_delete(usage_buffer);
-
-    data_buffer_delete(reader_watch_buffer);
-    data_buffer_delete(analyzer_watch_buffer);
-    data_buffer_delete(printer_watch_buffer);
-    data_buffer_delete(log_buffer);
+     buffer_delete(reader_buffer);
+    buffer_delete(usage_buffer);
+    buffer_delete(reader_watch_buffer);
+    buffer_delete(analyzer_watch_buffer);
+    buffer_delete(printer_watch_buffer);
+    buffer_delete(log_buffer);
 
 
     

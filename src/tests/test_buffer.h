@@ -1,0 +1,24 @@
+#ifndef TEST_BUFFER_H
+#define TEST_BUFFER_H
+void test_buffer_run_all(void);
+void test_buffer_new(void);
+void test_buffer_delete(void);
+void test_buffer_put(void);
+void test_buffer_get(void);
+void test_buffer_is_full(void);
+void test_buffer_is_empty(void);
+void test_put_get_buffer(void);
+void test_buffer_lock(void);
+void test_buffer_unlock(void);
+void test_buffer_call_consumer(void);
+void test_buffer_call_producer(void);
+void test_buffer_thread_producer_cleanup(void);
+void test_buffer_thread_consumer_cleanup(void);
+void test_buffer_is_to_deletion(void);
+void test_buffer_wait_for_producer(void);
+void test_buffer_wait_for_consumer(void);
+void test_buffer_thread_producer(void);
+void test_buffer_thread_consumer(void);
+void test_buffer_watchdog_thread_consumer(void);
+void test_producer_consumer(void);
+#endif

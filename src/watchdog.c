@@ -27,7 +27,6 @@ void watchdog_cancel_threads(const Watchdog* const watchdog){
 
    if(watchdog == NULL)return;
 
-    if(watchdog==NULL)return;
     for(size_t i = 0; i < watchdog->thread_count; i++){
         pthread_cancel(*(watchdog->thread_array[i]));
     }

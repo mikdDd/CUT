@@ -1,6 +1,6 @@
 #ifndef PRINTER_H
 #define PRINTER_H
-
+#include <inttypes.h>
 
 typedef struct Printer Printer;
 Printer* printer_new(const uint8_t cpu_count);
