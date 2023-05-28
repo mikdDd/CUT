@@ -2,14 +2,23 @@
 #include <string.h>
 #include <stdlib.h>
 #include "analyzer.h"
-
+/**
+ * @brief Analyzer struct containing cpu count, previous cpu records array
+ * and array with calculated usage  
+ * 
+ */
 struct Analyzer
-{                   //sprawdzic czy zgodne z FAM
-    uint8_t cpu_count;                                                                        // [0]    [1]     [2]   [3]    [4]   [5]    [6]      [7]    [8]     [9] 
-    Data* prev_values;      //[0] = prev_user; [1] = prev_nice; [2] = prev_system [3] ... // user  nice   system  idle  iowait  irq  softirq  steal  guest  guest_nice
+{                   
+    uint8_t cpu_count;    
+    Data* prev_values;     
     float usage_array[];
 };
-
+/**
+ * @brief Function that creates a new Analyzer
+ * 
+ * @param cpu_count count of CPUs
+ * @return Analyzer* pointer to new Analyzer
+ */
 Analyzer* analyzer_new(const uint8_t cpu_count){
     if(cpu_count == 0)return NULL;
     Analyzer* a = calloc(1,sizeof(Analyzer) + sizeof(float)*cpu_count);
@@ -18,12 +27,23 @@ Analyzer* analyzer_new(const uint8_t cpu_count){
     a->prev_values = calloc(cpu_count, sizeof(Data));
     return a;
 }
+/**
+ * @brief Function that deletes given Analyzer
+ * 
+ * @param analyzer to deletion
+ */
 void analyzer_delete(Analyzer* const analyzer){
     if(analyzer == NULL)return;
     free(analyzer->prev_values);
     free(analyzer);
 }
-
+/**
+ * @brief function that calculates usage of every CPU core
+ * 
+ * @param analyzer 
+ * @param arr array of cpu records from Reader
+ * @return float* array of usage for every CPU core
+ */
 float* analyzer_analyze_data(Analyzer* const analyzer, const Data arr[const]){
     if(analyzer == NULL)return NULL;
     if(arr == NULL)return NULL;
@@ -51,8 +71,7 @@ float* analyzer_analyze_data(Analyzer* const analyzer, const Data arr[const]){
             ret = 0.0;
         }
             
-            
-            analyzer->usage_array[i] = ret * 100;
+        analyzer->usage_array[i] = ret * 100;
     }
 
     memcpy(analyzer->prev_values, arr, analyzer->cpu_count * sizeof(Data));

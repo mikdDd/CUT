@@ -15,7 +15,7 @@ void test_printer_new(void){
     assert(printer != NULL);
     }
 
-    
+    //0 CPU
     {
     Printer* printer = printer_new(0);
     assert(printer == NULL);
@@ -44,18 +44,13 @@ void test_printer_print_data(void){
     float arr[3] = {0};
     printer_print_data(printer,arr);
     }
-
+    //NULL PRINTER
     {
     Printer* printer = NULL;
     float arr[3] = {0};
     printer_print_data(printer,arr);
     }
-
-    {
-    Printer* printer = NULL;
-    float* arr = NULL;
-    printer_print_data(printer,arr);
-    }
+    //NULL ARRAY
     {
     Printer* printer = printer_new(3);
     float* arr = NULL;

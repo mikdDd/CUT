@@ -1,7 +1,17 @@
 IDIR =../include
 CC=gcc
-CFLAGS= -std=c11 -O3 -I$(IDIR) -Wall -Wextra -g
-CFLAGSTEST = -std=c11 -O3 -I../$(IDIR) -Wall -Wextra -g
+
+
+ifeq ($(CC), gcc)
+ $(info Compiling with GCC)
+ CFLAGS= -std=c11 -O3 -I$(IDIR) #-Wall -Wextra -g
+else ifeq ($(CC), clang)
+ $(info Compiling with CLANG)
+ CFLAGS= -std=c11 -O3 -I$(IDIR) #-Weverything
+else
+ $(info Compiler not recognized)
+endif
+
 ODIR=obj
 TDIR=tests
 

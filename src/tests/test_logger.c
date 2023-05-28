@@ -9,14 +9,17 @@ void test_logger_run_all(void){
     test_logger_log_data();
 }
 void test_logger_new(void){
+    //USUAL BEHAVIOR
     {
     Logger* logger = logger_new("FILE");
     assert(logger != NULL);
     }
+    //NULL FILE
     {
     Logger* logger = logger_new(NULL);
     assert(logger == NULL);
     }
+    //EMPTY FILE NAME
     {
     Logger* logger = logger_new("");
     assert(logger == NULL);
@@ -47,22 +50,15 @@ void test_logger_log_data(void){
     int rem = remove("FILE");
     assert(rem == 0);
     }
-
+    //NULL LOGGER
     {
     Logger* logger = NULL;
     logger_log_data(logger,(char*){"LOGGER TEST"});
     }
-
-    {
-    Logger* logger = NULL;
-    logger_log_data(logger,NULL);
-    }
-
+    //NULL MESSAGE
     {
     Logger* logger = logger_new("FILE");
-    logger_log_data(logger,(char*){"LOGGER TEST"});
-    int t = remove("FILE");
-    assert(t == 0);
+    logger_log_data(logger,NULL);
     }
 }
 

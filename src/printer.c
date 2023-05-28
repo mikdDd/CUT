@@ -2,11 +2,20 @@
 #include <inttypes.h>
 #include <stdio.h>
 #include "printer.h"
-
+/**
+ * @brief Printer struct containing cpu count
+ * 
+ */
 struct Printer{
     uint8_t cpu_count;
 };
 
+/**
+ * @brief Function that creates a new Printer
+ * 
+ * @param cpu_count count of CPUs for which we want to print
+ * @return Printer* pointer to new Printer
+ */
 Printer* printer_new(const uint8_t cpu_count){
     if(cpu_count == 0)return NULL;
 

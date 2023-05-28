@@ -36,7 +36,7 @@ void test_reader_get_cpu_count(void){
     Reader* reader = reader_new();
     assert(reader_get_cpu_count(reader)!=0);
     }
-
+    //NULL READER
     {
     Reader* reader = NULL;
     assert(reader_get_cpu_count(reader)==0);

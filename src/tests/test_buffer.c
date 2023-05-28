@@ -25,18 +25,20 @@ void test_buffer_run_all(void){
     test_buffer_thread_consumer();
     test_buffer_watchdog_thread_consumer();
     test_producer_consumer();
+    test_buffer_thread_log_producer();
 }
 void test_buffer_new(void){
+    //USUAL BEHAVIOR
     {
     Buffer* buffer = buffer_new(sizeof(int),5);
     assert(buffer != NULL);
     }
-
+    //BUFFER WITH ELEMS SIZE OF 0
     {
     Buffer* buffer = buffer_new(0,5);
     assert(buffer == NULL);
     }
-
+    //BUFFER WITH 0 CAPACITY
     {
     Buffer* buffer = buffer_new(sizeof(int),0);
     assert(buffer == NULL);
@@ -441,6 +443,31 @@ void test_producer_consumer(void){
     assert(!buffer_is_empty(buffer));
     buffer_thread_consumer(buffer,arr_ptr);
     assert(buffer_is_empty(buffer));
+}
+
+void test_buffer_thread_log_producer(void){
+    //USUAL BEHAVIOR CHECK IF NOT CRASHING
+    {
+    Buffer* buffer = buffer_new(sizeof(int),5);  
+    buffer_thread_log_producer(buffer, (char*){"LOG MESSAGE"});
+    }
+
+    //NULL BUFFER CHECK IF NOT CRASHING
+    {
+    Buffer* buffer = NULL;  
+    buffer_thread_log_producer(buffer, (char*){"LOG MESSAGE"});
+    }
+
+    //EMPTY STRING
+    {
+    Buffer* buffer = buffer_new(sizeof(int),5);  
+    buffer_thread_log_producer(buffer,(char*){""});
+    }
+    //NULL STRING
+    {
+    Buffer* buffer = buffer_new(sizeof(int),5);  
+    buffer_thread_log_producer(buffer,NULL);
+    }
 }
 
 

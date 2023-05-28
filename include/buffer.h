@@ -20,7 +20,7 @@ void buffer_wait_for_consumer(Buffer* const db);
 int buffer_wait_for_producer_timedwait(Buffer* const db, const struct timespec* const ts);
 void buffer_thread_producer_cleanup(void* const arg);
 void buffer_thread_consumer_cleanup(void* const arg);
-void thread__log_producer_put_to_buffer(Buffer* db, char* data);
+void buffer_thread_log_producer(Buffer* db, char* data);
 bool buffer_is_to_deletion(const Buffer* const db);
 void buffer_thread_producer(Buffer* const restrict db, const void** const restrict data);
 void buffer_thread_consumer(Buffer* const restrict db, void** const restrict data);

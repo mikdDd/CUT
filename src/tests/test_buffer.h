@@ -21,4 +21,5 @@ void test_buffer_thread_producer(void);
 void test_buffer_thread_consumer(void);
 void test_buffer_watchdog_thread_consumer(void);
 void test_producer_consumer(void);
+void test_buffer_thread_log_producer(void);
 #endif

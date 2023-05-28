@@ -11,6 +11,7 @@ int main(void){
     test_watchdog_run_all();
     test_logger_run_all();
     test_buffer_run_all();
+    printf("ALL TESTs PASSED\n");
     
     return 0;
 }

@@ -9,16 +9,19 @@ void test_watchdog_run_all(void){
     test_watchdog_cancel_threads();
 }
 void test_watchdog_new(void){
+    //USUAL BEHAVIOR
     {
     const pthread_t** arr = calloc(3, sizeof(pthread_t*));
     Watchdog* watchdog = watchdog_new(arr,3);
     assert(watchdog!=NULL);
     }
+    //NULL ARRAY
     {
     const pthread_t** arr = NULL;
     Watchdog* watchdog = watchdog_new(arr,3);
     assert(watchdog==NULL);
     }
+    //0 THREADS
     {
     const pthread_t** arr = calloc(3,sizeof(pthread_t*));
     Watchdog* watchdog = watchdog_new(arr,0);
@@ -61,7 +64,7 @@ void test_watchdog_cancel_threads(void){
      pthread_join(t_3,NULL);
 
     }
-
+    //NULL WATCHDOG
     {
     Watchdog* watchdog = NULL;
     watchdog_cancel_threads(watchdog);

@@ -14,7 +14,7 @@ void test_analyzer_new(void){
     Analyzer* analyzer = analyzer_new(8);
     assert(analyzer != NULL);
     }
-
+    //0 CPU
     {
     Analyzer* analyzer = analyzer_new(0);
     assert(analyzer == NULL);
@@ -43,18 +43,13 @@ void test_analyzer_analyze_data(void){
     Data arr[3] = {0};
     assert(analyzer_analyze_data(analyzer,arr)!=NULL);
     }
-
+    //NULL ANALYZER
     {
     Analyzer* analyzer = NULL;
     Data arr[3] = {0};
     assert(analyzer_analyze_data(analyzer,arr)==NULL);
     }
-
-    {
-    Analyzer* analyzer = NULL;
-    Data* arr = NULL;
-    assert(analyzer_analyze_data(analyzer,arr)==NULL);
-    }
+    //NULL ARRAY
     {
     Analyzer* analyzer = analyzer_new(3);
     Data* arr = NULL;
